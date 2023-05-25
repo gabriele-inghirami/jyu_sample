@@ -1,0 +1,279 @@
+\documentclass[12pt, a4paper]{report}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%
+
+%\bibliographystyle{num-hvh}
+\usepackage[bookmarks,pdfhighlight=/O,colorlinks=false,pdfstartview=FitH]{hyperref}
+\usepackage{amsmath,amssymb,mathrsfs,slashed,bm}
+\usepackage{color}
+\usepackage{graphicx}
+\usepackage{epstopdf}
+\usepackage{hyperref}
+\usepackage{bm}
+\usepackage{color}
+\usepackage{bigints}
+\usepackage{morefloats}
+\usepackage{listings}
+
+%%%   New Definitions
+\newcommand{\eg}{{\it e.g.}}
+\newcommand{\etal}{{\it et. al.}}
+\newcommand{\ie}{{\it i.e.}}
+\newcommand{\lsim}{\lesssim}
+\newcommand{\gsim}{\gtrsim}
+\newcommand{\ii}{\mathrm{i}}
+\newcommand{\dd}{\mathrm{d}}
+\newcommand{\MeV}{\mathrm{MeV}}
+\newcommand{\GeV}{\mathrm{GeV}}
+\newcommand{\TeV}{\mathrm{TeV}}
+\newcommand{\fm}{\mathrm{fm}}
+\renewcommand{\b}[1]{{\bm #1}}
+\newcommand{\unit}[1]{\hat {{\bm #1}}} % unit vect
+
+\def\SymbReg{\textsuperscript{\textregistered}}
+
+
+\begin{document}
+	\title{Notes about Monte Carlo particle sampling\\\vspace*{1cm}\small{Version: 0.5}}
+\author{Gabriele Inghirami\\\footnotesize{(with the inclusion of material written by Valentina Rolando)}}
+\maketitle
+\tableofcontents
+
+\part{Formalism}
+\chapter{Basic formalism}
+\section{A brief recall about useful transformations}
+\emph{Note: this section is largely based on notes kindly shared by Valentina Rolando - University and INFN section of Ferrara, Italy.}\\
+
+ECHO-QGP uses the ``East coast'' metric signature (-,+,+,+), while in particle physics it is common to use the ``West coast'' signature (+,-,-,-).\\
+Here we use the latter: (+,-,-,-).\\
+We work in Milne/Bjorken coordinates, with diagonal metric tensors:
+\begin{equation}
+g_{\mu \nu}=(1,-1,-1,-\tau^2)\qquad g^{\mu \nu}=(1,-1,-1,-\frac{1}{\tau^2})
+\end{equation}
+The relations between Milne/Bjorken $(\tau,\tilde{x},\tilde{y},\eta)$ and Minkowski $(t,x,y,z)$ coordinates are:
+\begin{equation}
+t=\tau\cosh \eta \qquad z=\tau\sinh \eta
+\end{equation}
+and
+\begin{equation}
+\tau=\sqrt{t^2-z^2} \qquad \eta=\dfrac{1}{2}\log \dfrac{t+z}{t-z}.
+\end{equation}
+We recall that the rapidity $Y$ is defined as:
+\begin{equation}
+Y=\dfrac{1}{2}\log \dfrac{E+p^z}{E-p^z}=\dfrac{1}{2}\log \dfrac{1+v^z}{1-v^z}.
+\label{rapdef}
+\end{equation}
+From Eq. \ref{rapdef} we get:\footnote{From the definition of $Y$ we get easily $e^{2Y}=\frac{1+v^z}{1-v^z}$. Since $\tanh Y=\frac{e^{2Y}-1}{e^{2Y}+1}\rightarrow e^{2Y}=\tanh Y (e^{2Y}+1) + 1$, so, after replacing $e^{2Y}$ with $\frac{1+v^z}{1-v^z}$, we obtain $\tanh Y = v^z=-v_z$.}
+\begin{equation}
+\tanh Y = v^z.
+\label{rapidity_vz_relation}
+\end{equation}
+We can get other useful relations from Eq. (\ref{rapidity_vz_relation}):
+\begin{equation}
+\gamma^z=\frac{1}{\sqrt{1-{v^z}^2}}=\frac{1}{\sqrt{1-(\tanh Y)^2}}=\cosh Y
+\label{gammaz_rel}
+\end{equation}
+and
+\begin{equation}
+\sinh Y = \tanh Y \cosh Y = v^z \gamma^z = -v_z \gamma^z.
+\label{vzgammaz_rel}
+\end{equation}
+We recall that the transformation law of a contravariant four-vector is:
+\begin{equation}
+A^{\mu'}=\partial_{\nu}(x^{\mu'})A^{\nu},
+\label{contra_tr}
+\end{equation}
+while for a covariant four vector it is:
+\begin{equation}
+A_{\mu'}=\partial_{\mu'}(x^{\nu})A_{\nu}.
+\label{cova_tr}
+\end{equation}
+
+The non null derivatives are:
+\begin{align*}
+&{\color{red}\partial_{\tau} t}=\partial_{\tau} (\tau \cosh \eta) = {\color{red}\cosh \eta}\\
+&{\color{red}\partial_{\tau} z}=\partial_{\tau} (\tau \sinh \eta) = {\color{red}\sinh \eta}\\
+&{\color{red}\partial_{\eta} t}=\partial_{\eta} (\tau \cosh \eta) = {\color{red}\tau \sinh \eta}\\
+&{\color{red}\partial_{\eta} z}=\partial_{\eta} (\tau \sinh \eta) = {\color{red}\tau \cosh \eta}\\
+&{\color{blue}\partial_{t} \tau}=\partial_{t} \left( \sqrt{t^2-z^2} \right) = \frac{t}{\sqrt{t^2-z^2}} =  \frac{t}{\tau}={\color{blue} \cosh \eta }\\
+&{\color{blue}\partial_{t} \eta}=\partial_{t} \left( \frac{1}{2}\log\frac{t+z}{t-z} \right) = -\frac{z}{t^2-z^2}=-\frac{z}{\tau^2}={\color{blue}-\frac{\sinh \eta}{\tau}}\\
+&{\color{blue}\partial_{z} \tau}=\partial_{z} \left( \sqrt{t^2-z^2} \right) = -\frac{z}{\sqrt{t^2-z^2}}=-\frac{z}{\tau}={\color{blue} - \sinh \eta }\\
+&{\color{blue}\partial_{z} \eta}=\partial_{z} \left( \frac{1}{2}\log\frac{t+z}{t-z} \right) = \frac{t}{\tau^2}={\color{blue} \frac{\cosh \eta}{\tau}}\\
+\end{align*}
+In short, we get the following explicit formulas to transform a contravariant four vector $A^{\mu}$ from Bjorken to Minkwoski coordinates:
+\begin{align}
+A^t&=\partial_{\tau} t A^{\tau} + \partial_{\eta} t A^{\eta}=\cosh\eta A^{\tau} + \tau\sinh\eta A^{\eta},\\
+A^z&=\partial_{\tau} z A^{\tau} + \partial_{\eta} z A^{\eta}=\sinh \eta A^{\tau} + \tau\cosh\eta A^{\eta},
+\end{align}
+while, for a covariant $A_{\mu}$:
+\begin{align}
+A_t&=\partial_t \tau A_{\tau} + \partial_t \eta A_{\eta}=\cosh\eta A_{\tau}- \dfrac{\sinh\eta}{\tau} A_{\eta},\\
+A_z&=\partial_z \tau A_{\tau} + \partial_z \eta A_{\eta}=-\sinh\eta A_{\tau} + \dfrac{\cosh\eta}{\tau} A_{\eta}.
+\end{align}
+If we want to transform from Minkowkski to Milne coordinates, we get, instead:
+\begin{align}
+A^{\tau}&=\partial_t \tau A^t + \partial_z \tau A^z=\cosh \eta A^t - \sinh \eta A^z\\
+A^{\eta}&=\partial_t \eta A^t + \partial_z \eta A^z=-\frac{\sinh \eta}{\tau} A^t + \frac{\cosh \eta}{\tau} A^z,\\
+\end{align}
+while, for a covariant $A_{\mu}$:
+\begin{align}
+A_{\tau}&=\partial_{\tau} t A_t + \partial_{\tau} z A_z = \cosh \eta A_t + \sinh \eta A_z,\\
+A_{\eta}&=\partial_{\eta} t A_t + \partial_{\eta} z A_z = \tau \sinh \eta A_t + \tau \cosh \eta A_z.
+\end{align}
+
+When transforming four velocities from Minkowski to Milne coordinates, we find the following useful relations:
+\begin{align}
+{\color{blue}u^{\tau}}&=\partial_{t}(x^{\tau})u^t+\partial_{z}(x^{\tau})u^z=\frac{t}{\tau}\gamma-\frac{z}{\tau}\gamma v^z=\gamma \cosh \eta - \gamma v^z \sinh \eta\\
+&=\dfrac{\gamma}{\gamma^z}(\gamma^z\cosh \eta - \gamma^z v^z \sinh \eta)\\
+&=\dfrac{\gamma}{\cosh Y}(\cosh Y \cosh \eta - \sinh Y \sinh \eta)={\color{blue}\gamma \dfrac{\cosh(Y-\eta)}{\cosh Y}}\\
+{\color{blue}u^{\eta}}&=\partial_{t}(x^{\eta})u^t+\partial_{z}(x^{\eta})u^z=-\frac{z}{\tau^2}\gamma+\frac{t}{\tau^2}\gamma v^z\\
+&=\dfrac{\gamma}{\tau \gamma^z}(\gamma^z v^z \cosh \eta - \gamma^z \sinh \eta)\\
+&=\dfrac{\gamma}{\tau \cosh Y}(\cosh \eta \sinh Y - \cosh Y \sinh \eta)={\color{blue}\dfrac{\gamma}{\tau} \dfrac{\sinh(Y-\eta)}{\cosh Y}}
+\end{align}
+and:
+\begin{align}
+{\color{red}u_{\tau}}&=\partial_{\tau}(x^t)u_t+\partial_{\tau}(x^z)u_z=\gamma \cosh \eta - \gamma v_z \sinh \eta\\
+&=\dfrac{\gamma}{\gamma^z}(\gamma^z \cosh \eta + v_z \gamma^z \sinh \eta)=\dfrac{\gamma}{\cosh Y}(\cosh Y \cosh \eta - \sinh Y \sinh \eta)\\
+&={\color{red}\gamma \dfrac{\cosh(Y-\eta)}{\cosh Y}}\\
+{\color{red}u_{\eta}}&=\partial_{\eta}(x^t)u_t+\partial_{\eta}(x^z)u_z=\gamma\tau\sinh \eta + \gamma \tau \cosh \eta v_z\\
+&=\dfrac{\gamma \tau}{\gamma^z}(\gamma^z \sinh \eta + \gamma^z v_z \cosh \eta)=
+\dfrac{\gamma \tau}{\cosh Y}(\cosh Y \sinh \eta - \sinh Y \cosh \eta)\\
+&={\color{red}-\dfrac{\gamma}{\tau} \dfrac{\sinh(Y-\eta)}{\cosh Y}}.
+\end{align}
+
+
+	
+	\chapter{Monte Carlo particle sampling}
+	\section{General implementation}
+	We recall the Cooper-Frye equation:
+	\begin{equation}
+	E\dfrac{d^3 N_i}{dp^3}=\dfrac{g_i}{(2\pi)^3}\int_{\Sigma}\dfrac{p^{\mu} d^3\Sigma_{\mu}}{\exp{\frac{u^{\mu}p_{\mu}-\mu_i}{T_{FO}}\pm 1}}
+	\end{equation}
+	
+	Until the four momentum sampling, we follow Ref.~\cite{Huovinen:2012is}
+	from eq.(6) to eq.(9).\\
+	
+	For each hadron species the number of produced in a cell of the f.o. hypersurface is given by:
+	\begin{equation}
+	N_i = j^\mu d\sigma_\mu = n_i  u^\mu  d\sigma_{\mu},
+	\label{num_par}
+	\end{equation}
+	(only if  $u^\mu d\sigma_{\mu}>0$), $n_i$ being the particle density in the LRF.\\
+	We should take into account all the particles evolved by the afterburner. \\
+	If we assume to have a Boltzmann distribution we can perform the integration over momentum
+	and obtain
+	\begin{equation}
+	n_i=\frac{4\pi g_i m_i^2 T}{(2\pi)^3}e^{{\mu}/{T}}K_2\left(\frac{m_i}{T}\right),
+	\end{equation}
+	while for pions, taking into account the Bose distribution due to their small mass, we get:
+	\begin{equation}
+	n_\pi = \frac{g_\pi m_\pi^2T}{(2\pi)^2}\sum_{k=1}^\infty \frac{1}{k}K_2\left(\frac{k
+		m_\pi}{T}\right)e^{{k\mu}/{T}},
+	\end{equation} 
+	with $K_2$ a Bessel function of the second kind and the sum limited to $k=10$.\\
+	We compute $N=\sum N_i$ and, if $N< 0.01$, we consider it a probability, we pick up a random number and, if it is less than $N$, we create a particle.
+	If $N>=0.01$, we sample from a Poisson distribution with mean value $N$ the number of particles to be produced.
+	The kind of particle is decided according to its
+	probability $N_i/N$. \\
+	
+    {\emph{In the current implementation, a full scan of all the cells of the freeze-out hypersurface is performed, without enforcing any constraint (e.g. total energy or baryon number).}}\\
+	
+	The four momenta of the particles are sampled from the 
+	Cooper-Frye distribution of the cell (taking only  
+	$f(x,p) p^\mu d\sigma_{\mu} >0$)
+	\begin{equation}
+	\frac{d N(x)}{d^3p} = \frac{1}{E} f(x,p) p^\mu d\sigma_{\mu},
+	\end{equation}
+	$f(x,p)$ being the Fermi (or Bose) distribution of the particle.\\
+	We sample the momentum with the rejection method, after finding the finding the maximum of
+	the distribution using a loop covering the region where the maximum is expected, but with a coarse resolution, compensated by multiplying the maximum found during the scan by an additional factor larger than 1 (e.g.  1.2 as in Ref.~\cite{Huovinen:2012is}), so to stay on the safe side.\\
+    First we sample a four momentum in the local rest frame of the fluid in Minkowski coordinates:
+	\begin{equation}
+	\dfrac{p^2 \sin{\theta}}{p^0}\dfrac{p^{\mu}d\Sigma_{\mu}}{\exp{\frac{p^0-\mu}{T_{f.o.}}}\pm 1}
+	\label{mycf}
+	\end{equation}
+	using two uniform distributions for $|p|$ (usually from 0 to 20 GeV) and $\phi$ (from 0 to $2\pi$), while $\theta$ (from 0 to $\pi$) is obtained picking up a random number $r\in [0,1)$ and computing $\theta=\arccos(-1+2r)$, so to get:
+	\begin{align}
+	p^x&=p\sin(\theta)\cos(\phi)\\
+	p^y&=p\sin(\theta)\sin(\phi)\\
+	p^z&=p\cos(\theta).\\
+	\end{align}
+	
+	Then, $T_{f.o.}$ is known, $p^0=\sqrt{p^2+m^2}$ and of course the mass $m$ and the statistical term $\pm 1$ depend on the particle.\\
+	The hypersurface has been computed in Milne (or Bjorken) coordinates, so we need to transform the $d\Sigma_{\mu}$ and the velocity components.\\	
+	The sampled four momenta are then boosted in the lab frame:
+	\begin{equation}
+	p^{\mu}=\Lambda^{\mu}_{\nu}q^{\nu}, \quad \Lambda=
+	\begin{pmatrix} u^0 & u^j\\ u^i & \delta^{ij}+\dfrac{u^i u^j}{u^0+1}\end{pmatrix}
+	\end{equation}
+	\subsection{The 2D+1 boost invariant case}
+	\section{The shear viscosity}
+	\section{The EoS with chemical potentials}
+	
+	\chapter{The particle decays}
+\part{Usage}
+
+\part{Implementation}
+\chapter{Tests}
+
+\chapter{References:}
+\begin{thebibliography}{20}
+	\bibitem{Karpenko:2015xea}
+	I.~A.~Karpenko, P.~Huovinen, H.~Petersen and M.~Bleicher,
+	``Estimation of the shear viscosity at finite net-baryon density from $A+A$ collision data at $\sqrt{s_\mathrm{NN}} = 7.7-200$ GeV,''
+	Phys.\ Rev.\ C {\bf 91} (2015) no.6,  064901
+	doi:10.1103/PhysRevC.91.064901
+	[arXiv:1502.01978 [nucl-th]]
+	
+	\bibitem{Hirano:2012kj}
+	T.~Hirano, P.~Huovinen, K.~Murase and Y.~Nara,
+	``Integrated Dynamical Approach to Relativistic Heavy Ion Collisions,''
+	Prog.\ Part.\ Nucl.\ Phys.\  {\bf 70} (2013) 108
+	doi:10.1016/j.ppnp.2013.02.002
+	[arXiv:1204.5814 [nucl-th]]
+	
+	\bibitem{Huovinen:2012is}
+	P.~Huovinen and H.~Petersen,
+	``Particlization in hybrid models,''
+	Eur.\ Phys.\ J.\ A {\bf 48} (2012) 171
+	doi:10.1140/epja/i2012-12171-9
+	[arXiv:1206.3371 [nucl-th]]
+	
+	\bibitem{Cooper:1974mv}
+	F.~Cooper and G.~Frye,
+	%``Comment on the Single Particle Distribution in the Hydrodynamic and Statistical Thermodynamic Models of Multiparticle Production,''
+	Phys.\ Rev.\ D {\bf 10} (1974) 186.
+	doi:10.1103/PhysRevD.10.186
+	
+	\bibitem{DelZanna:2013eua}
+	L.~Del Zanna {\it et al.},
+	%``Relativistic viscous hydrodynamics for heavy-ion collisions with ECHO-QGP,''
+	Eur.\ Phys.\ J.\ C {\bf 73} (2013) 2524
+	doi:10.1140/epjc/s10052-013-2524-5
+	[arXiv:1305.7052 [nucl-th]]
+	
+	\bibitem{Schenke:2010nt}
+	B.~Schenke, S.~Jeon and C.~Gale,
+	%``(3+1)D hydrodynamic simulation of relativistic heavy-ion collisions,''
+	Phys.\ Rev.\ C {\bf 82} (2010) 014903
+	doi:10.1103/PhysRevC.82.014903
+	[arXiv:1004.1408 [hep-ph]]
+	
+	\bibitem{Becattini:2015ska}
+	F.~Becattini {\it et al.},
+	%``A study of vorticity formation in high energy nuclear collisions,''
+	Eur.\ Phys.\ J.\ C {\bf 75} (2015) no.9,  406
+	Erratum: [Eur.\ Phys.\ J.\ C {\bf 78} (2018) no.5,  354]
+	doi:10.1140/epjc/s10052-015-3624-1, 10.1140/epjc/s10052-018-5810-4
+	[arXiv:1501.04468 [nucl-th]]
+	
+	\bibitem{Karpenko:2013wva}
+	I.~Karpenko, P.~Huovinen and M.~Bleicher,
+	%``A 3+1 dimensional viscous hydrodynamic code for relativistic heavy ion collisions,''
+	Comput.\ Phys.\ Commun.\  {\bf 185} (2014) 3016
+	doi:10.1016/j.cpc.2014.07.010
+	[arXiv:1312.4160 [nucl-th]]
+	
+\end{thebibliography}
+	
+\end{document}
