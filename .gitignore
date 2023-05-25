@@ -4,7 +4,6 @@
 *.bbl
 *.blg
 *.bst
-*.dat
 *.dvi
 *.exe
 *.f90~
