@@ -49,24 +49,18 @@
 	 module work 
 	  
 	  use constants
+      use settings
 	  implicit none
 !  procedure(), pointer:: cooper_frye
 
-	  
-	  real, parameter :: MAXfactor=1.2 !parameter to increse the maximum of Cooper-Frye found with a coarse method
-	  real, parameter :: minCF=1.e-12 !minimum value of Cooper-Frye maximum to sample a particle
 	  real, dimension(0:3) :: xfo, ufo, dV
 	  real, dimension(1:3) :: vfo
 	  real rho, prex
-	  integer, parameter ::  CUT_PI=10
-      real(8), parameter :: PMAX_BOX=12 !maximum momentum for CF sampling
-      integer, parameter :: N_dp=121, N_dphi=81, N_dth=41 
       real, dimension(1:N_dth) :: dth_arr
       real, dimension(1:N_dphi-1) :: dphi_arr
       real, dimension(1:N_dp) :: dp_arr
       real, dimension(1:4, 1:N_dth, 1:N_dphi-1,1:N_dp) :: dmom_arr
       real, dimension(0:3,0:3) :: Lambda_boost, Lambda_boost_back, pi_shear, pi_shear_lrf, tmparr
-      real, parameter :: GREEK_PI=acos(-1.d0)
       logical :: viscosity
       integer, parameter :: kt=0, kx=1, ky=2, kz=3
       real(8), allocatable, dimension (:) :: particle_density, particle_density_common
@@ -111,12 +105,11 @@
           end subroutine fill_N_Arrays
 	 subroutine work_choose_random_index(iii, MMM)
 	! ! !  extracts integer random value between 0 and MMM
-	    use constants
 	    implicit none
 	    integer, intent(out) :: iii !index
 	    integer, intent(in)  :: MMM !max 
 	    
-	    real r
+	    real(8) :: r
 	    
 	    call random_number(r)
 	    r=(MMM*1.0+1.0)*r
@@ -130,8 +123,9 @@
 	!  where N_i = n_i u^mu dSigma_mu (fm^-3 * fm^3 = adimensional )
 	  use constants
 	  use common
-          use eos
+      use eos
 	  use numlib
+      use settings
 	  implicit none
 	  
 	 !   contains desity for each specie  

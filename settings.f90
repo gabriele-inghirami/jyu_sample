@@ -4,13 +4,13 @@
 ! *
 ! *  Version: 0.5
 ! *                          
-! *  Date (DD/MM/YYYY): 08/10/2019
+! *  Date (DD/MM/YYYY): 02/07/2023
 ! *                  
-! *  File: jyu_sample/common.f90 
+! *  File: jyu_sample/settings.f90 
 ! *                           
 ! *  Author: 
-! *  Gabriele Inghirami (University of Jyvaskyla and Helsinki Institute of physics- Finland)
-! *  E-mail: gabriele.g.inghirami@jyu.fi
+! *  Gabriele Inghirami (GSI Helmholtzzentrum für Schwerionenforschung GmbH)
+! *  E-mail: g.inghirami@gsi.de
 ! *  in collaboration with:
 ! *  Harri Niemi (University of Jyvaskyla and Helsinki Institute of physics- Finland)
 ! * 
@@ -49,46 +49,20 @@
 ! *
 ! *  *  *  *  * 
 
-  module constants
+module settings
   implicit none
-      real(8), parameter :: PIGRECO=3.14159265358979323846
-      real(8), parameter :: HBARC=0.197326
-      real(8), parameter :: NOR_DENS=1.0/(2.0*PIGRECO*PIGRECO*HBARC*HBARC*HBARC)
-      real(8), parameter :: TWOPIhbarc_cube = (2.0*PIGRECO*HBARC)**3
-      real(8), parameter :: GREEK_PI=acos(-1.d0)
-  end module constants
- ! !------------------------------------------------------------------  
-  module common ! OVERALL
-    use constants
-    use settings
-    implicit none
+  !the D2 option selects boost invariant sampling.
+  !If D2=.true. then the pseudorapidity of the particle is randomly sampled from a uniform distribution from
+  !-eta_pseudorap_max to +eta_pseudorap_max
+  !If D2=.false. then we perform a 3D sampling and the pseudorapidity is simply that of the freeze-out hypersurface cell
+  logical, parameter :: D2=.false.
+  real(8), parameter :: eta_pseudorap_max=2.d0
+  !1=CORNELIUS, 2=ECHO-QGP 2D+1 ideal, 3=ECHO-QGP 2D+1 visco, 4=ECHO-QGP 3D+1 ideal, 5=ECHO-QGP 3D+1 visco
+  integer, parameter :: hyp_format=1
 
-      integer dimension_flag
-! 	directory and file names for the i/o
-      character*32 inputdir,file,input,input1,outdir,output      
-      integer LID_in, LID_out
-      integer  frozen_cells,  produced_particles
-      real Energy_int,particle_energy
-    
-      integer npart
-      integer seed_settings, trueseed
-      
-contains
- 
-! !------------------------------------------------------------------  
- subroutine check_file(Status, filename)
-  implicit none
-  integer, intent(in) :: Status
-  character(len=*), intent(in) :: filename
-  if (Status .ne. 0) then
-    print *, "******  ERROR  ******"
-    print *, "the file named:    " , filename
-    print *, "cannot be opened. I am forced to quit!"
-    
-    print *, "filename test", filename
-    
-    call exit(1)
-  end if
- end subroutine check_file
- ! !------------------------------------------------------------------   
- end module common
+  real(8), parameter :: MAXfactor=1.2 !parameter to increse the maximum of Cooper-Frye found with a coarse method
+  real(8), parameter :: minCF=1.e-12 !minimum value of Cooper-Frye maximum to sample a particle
+  integer, parameter ::  CUT_PI=10
+  real(8), parameter :: PMAX_BOX=12 !maximum momentum for CF sampling
+  integer, parameter :: N_dp=121, N_dphi=81, N_dth=41 
+end module settings
