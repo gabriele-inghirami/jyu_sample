@@ -15,6 +15,11 @@
 \usepackage{morefloats}
 \usepackage{listings}
 
+\lstset{
+    basicstyle=\footnotesize, % here we adjust the font size of listings
+}
+
+
 %%%   New Definitions
 \newcommand{\eg}{{\it e.g.}}
 \newcommand{\etal}{{\it et. al.}}
@@ -39,9 +44,9 @@
 \maketitle
 \tableofcontents
 
-\part{Formalism}
-\chapter{Basic formalism}
-\section{A brief recall about useful transformations}
+\chapter{Formalism}
+\section{Basic formalism}
+\subsection{A brief recall about useful transformations}
 \emph{Note: this section is largely based on notes kindly shared by Valentina Rolando - University and INFN section of Ferrara, Italy.}\\
 
 ECHO-QGP uses the ``East coast'' metric signature (-,+,+,+), while in particle physics it is common to use the ``West coast'' signature (+,-,-,-).\\
@@ -143,8 +148,8 @@ and:
 
 
 	
-	\chapter{Monte Carlo particle sampling}
-	\section{General implementation}
+	\section{Monte Carlo particle sampling}
+	\subsection{General implementation}
 	We recall the Cooper-Frye equation:
 	\begin{equation}
 	E\dfrac{d^3 N_i}{dp^3}=\dfrac{g_i}{(2\pi)^3}\int_{\Sigma}\dfrac{p^{\mu} d^3\Sigma_{\mu}}{\exp{\frac{u^{\mu}p_{\mu}-\mu_i}{T_{FO}}\pm 1}}
@@ -206,19 +211,32 @@ and:
 	p^{\mu}=\Lambda^{\mu}_{\nu}q^{\nu}, \quad \Lambda=
 	\begin{pmatrix} u^0 & u^j\\ u^i & \delta^{ij}+\dfrac{u^i u^j}{u^0+1}\end{pmatrix}
 	\end{equation}
-	\subsection{The 2D+1 boost invariant case}
-	\section{The shear viscosity}
-	\section{The EoS with chemical potentials}
-	
-	\chapter{The particle decays}
-\part{Usage}
-\chapter{How to compile the code}
-\chapter{Configuration and execution}
-\part{Implementation}
-\chapter{Workflow}
-\chapter{Tests}
+	\subsubsection{The 2D+1 boost invariant case}
+	\subsection{The shear viscosity}
+	\subsection{The EoS with chemical potentials}	
+	\section{The particle decays}
+    
+\chapter{Usage}
+\section{How to get and compile the code}
+The code can be downloaded from \href{https://github.com/gabriele-inghirami/jyu_sample}{GitHub} as a zip archive or cloned (if \textbf{git} is installed) with
+\begin{lstlisting}[language=bash]
+  git clone https://github.com/gabriele-inghirami/jyu_sample.git
+\end{lstlisting}
+In the source tree, open the file \emph{makefile} and adjust the compilation flags to your system.\\
+Without modifications the downloaded \emph{makefile} uses \textbf{gfortran}\footnote{\textbf{gfortran} is part of the \textbf{\href{https://gcc.gnu.org/}{gcc}} compiler collection, which is the default available on nearly all GNU/Linux distributions}, but \textbf{ifort}\footnote{\textbf{ifort}, the \textbf{Intel\textsuperscript{\textregistered} Fortran Compiler} is part of the \textbf{\href{https://www.intel.com/content/www/us/en/developer/tools/oneapi/fortran-compiler.html}{Intel\textsuperscript{\textregistered} One Api}} suite} should also work fine and perhaps produce a faster executable.\\
+Please, note that the default gfortran flags \emph{-march=native -mtune=native} optimize the code for the execution on the cpu type used for the compilation, but the produced executable might not run on other cpus, usually older or produced by another manufacturer. This might be an issue if one compiles the code in the login node if a cluster which is newer or has different architecture than the computational nodes. In this case, please, either compile the code on the computational nodes or change these flags (in the worst case \emph{-march=x86-64} should be safe on all Intel/AMD 64bit cpus, albeit it will overlook many recent features that might produce a faster code).
 
-\chapter{References:}
+\section{Configuration options}
+
+
+\section{Example of execution}
+
+
+\chapter{Implementation}
+\section{Workflow}
+\section{Tests}
+
+\addcontentsline{toc}{chapter}{References}
 \begin{thebibliography}{20}
 	\bibitem{Karpenko:2015xea}
 	I.~A.~Karpenko, P.~Huovinen, H.~Petersen and M.~Bleicher,
