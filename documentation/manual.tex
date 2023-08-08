@@ -5,7 +5,7 @@
 %\bibliographystyle{num-hvh}
 \usepackage[bookmarks,pdfhighlight=/O,colorlinks=false,pdfstartview=FitH]{hyperref}
 \usepackage{amsmath,amssymb,mathrsfs,slashed,bm}
-\usepackage{color}
+\usepackage[usenames,dvipsnames]{xcolor}
 \usepackage{graphicx}
 \usepackage{epstopdf}
 \usepackage{hyperref}
@@ -227,6 +227,57 @@ Without modifications the downloaded \emph{makefile} uses \textbf{gfortran}\foot
 Please, note that the default gfortran flags \emph{-march=native -mtune=native} optimize the code for the execution on the cpu type used for the compilation, but the produced executable might not run on other cpus, usually older or produced by another manufacturer. This might be an issue if one compiles the code in the login node if a cluster which is newer or has different architecture than the computational nodes. In this case, please, either compile the code on the computational nodes or change these flags (in the worst case \emph{-march=x86-64} should be safe on all Intel/AMD 64bit cpus, albeit it will overlook many recent features that might produce a faster code).
 
 \section{Configuration options}
+The behavior of the sampler can be configured by editing the file \emph{settings.f90} and (re)compiling the code.\\
+Here we list the options contained in \emph{settings.f90} with some explanations, that can also be found as comments in the file itself.\\
+In most cases the user needs to set only the options in the first part of the file, the options in the second part are a bit more technical.\\
+\begin{center}
+    \textbf{Basic options}
+\end{center}
+\begin{itemize}
+    \item {\color{ForestGreen}hyp\_format}\\
+        The format of the freeze-out hypersurface. It can be:
+        \begin{enumerate}
+            \item CORNELIUS
+            \item ECHO-QGP 2D+1 ideal
+            \item ECHO-QGP 2D+1 viscous
+            \item ECHO-QGP 3D+1 ideal
+            \item ECHO-QGP 3D+1 viscous
+        \end{enumerate}
+    \item  {\color{ForestGreen}D2}\\
+        It tells the sampler if it should use a pseudorapidity uniform sampling or not.\\
+        It could be set automatically depending on the value of \emph{hyp\_format}, which tells you the dimensions of the hypersurface, but for the moment it is set separately for testing purposes.\\
+        It can be:
+        \begin{itemize}
+            \item \textbf{.true.} the pseudorapidity of the particle is randomly sampled from a uniform distribution from $-\eta_{pseudorap\_max}$ to $+\eta_{pseudorap\_max}$ (usually this is the desired behavior in 2D+1 simulations)
+            \item \textbf{.false.} a 3D sampling is performed and the pseudorapidity is simply that of the freeze-out hypersurface cell (uniformly smeared)
+        \end{itemize}
+    \item {\color{ForestGreen}eta\_pseudorap\_max}\\
+         The absolute value of $\eta_{pseudorap\_max}$ in the case of uniform sampling of pseudorapidity (\emph{D2=.true.}). The type is defined as \emph{real(8)}.
+\end{itemize}
+\vspace*{2mm}
+\begin{center}
+    \textbf{Advanced technical options}
+\end{center}
+\begin{itemize}
+    \item {\color{PineGreen}minCF}\\
+        The minimum value of the maximum probability to sample a particle in the Cooper-Frye procedure. Very small values allow to try to sample a particle even if it is very unlikely that it will be created, however, if too small, the marginal improved accuracy comes at the expense of overall longer sampling times. The type is defined as \emph{real(8)}..
+    \item {\color{PineGreen}PMAX\_BOX}\\
+        The maximum value of the momentum (expressed in Gev) to be used in the integral of the distribution function for the sampling. The higher this value, the longer the integration time; however, if it is too small, it might introduce biases when sampling the momentum of heavy hadrons. The type is defined as \emph{real(8)}.
+    \item {\color{PineGreen}MASS\_LIMIT\_FOR\_HIGHER\_EXPANSION}\\
+        Below this particle rest mass value [GeV] we use a high order expansion with Bessel functions to compute the particle density. The type is defined as \emph{real(8)}.
+    \item {\color{PineGreen}CUT\_PI}\\
+        The number of terms in the high order expansion with Bessel functions. The type is defined as integer.
+    \item {\color{PineGreen}N\_dp, N\_dphi, N\_dth}\\
+        The resolution of the coarse grained grid to get a quick, but raw estimate the maximum of the distribution to sample a particle.
+        \begin{itemize}
+            \item \textbf{N\_dp} Number of cells for the module of the momentum, ranging from 0 to PMAX\_BOX [GeV].
+            \item \textbf{N\_dphi} Number of cells for the azimuthal angle $\phi$, ranging from 0 to 2$\pi$.
+            \item \textbf{N\_th} Number of cells for the azimuthal angle $\theta$, ranging from 0 to $\pi$.
+        \end{itemize}
+        N\_dp, N\_dphi and N\_th are all defined as integers.     
+    \item {\color{PineGreen}MAXfactor}\\
+        Factor by which the estimated value of the maximum of the sampling distribution found approximately with the coarse method is increased. For a correct sampling, it is important to not overshoot this maximum value. On the other hand, a factor too large, despite being safe, can lead to significantly longer sampling times. The type is defined as \emph{real(8)}.        
+\end{itemize}
 
 
 \section{Example of execution}

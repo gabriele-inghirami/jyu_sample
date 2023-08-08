@@ -56,7 +56,7 @@ module settings
   ! non technical user options
 
   ! format of the hypersurface
-  ! 1=CORNELIUS, 2=ECHO-QGP 2D+1 ideal, 3=ECHO-QGP 2D+1 visco, 4=ECHO-QGP 3D+1 ideal, 5=ECHO-QGP 3D+1 visco
+  ! 1=CORNELIUS, 2=ECHO-QGP 2D+1 ideal, 3=ECHO-QGP 2D+1 viscous, 4=ECHO-QGP 3D+1 ideal, 5=ECHO-QGP 3D+1 viscous
   integer, parameter :: hyp_format=1
 
   ! boost invariant sampling.
@@ -75,7 +75,7 @@ module settings
   ! however, if too small, the marginal improved accuracy comes at the expense of overall longer sampling times
   real(8), parameter :: minCF=1.e-12
 
-  ! maximum value of the momentum to be used in the integral of the distrbution function for the sampling
+  ! maximum value of the momentum to be used in the integral of the distribution function for the sampling
   ! the higher this value, the longer the integration time; however, if it is too small, it might introduce biases
   ! when sampling the momentum of heavy hadrons
   real(8), parameter :: PMAX_BOX=12
@@ -89,12 +89,14 @@ module settings
 
   ! the resolution of the coarse grained grid to get a quick,
   ! but raw estimate the maximum of the distribution to sample a particle
-  ! N_dp = num. of cells of momentum
-  ! N_dphi = num. of cells of the azimuthal angle phi (0 - 2\pi)
-  ! N_dth = num. of cells of the polar angle theta (0 - \pi)
+  ! N_dp = num. of cells for the module of the momentum (0 - PMAX_BOX)
+  ! N_dphi = num. of cells for the azimuthal angle \phi (0 - 2\pi)
+  ! N_dth = num. of cells for the polar angle \theta (0 - \pi)
   integer, parameter :: N_dp=121, N_dphi=81, N_dth=41
 
-  ! parameter to increase the estimated value of the maximum of the sampling distribution found with the coarse method
+  ! Factor by which the estimated value of the maximum of the sampling distribution approximately found with the coarse method is increased.
+  ! For a correct sampling, it is important to not overshoot this maximum value. On the other hand, a factor too large, despite
+  ! being safe, can lead to significantly longer sampling times.
   real(8), parameter :: MAXfactor=1.2
 
 end module settings
