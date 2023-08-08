@@ -199,7 +199,7 @@
 		  ! if we are dealing with pions use the expansion to higher order 
 		  ! (up to CUT_PI)
 		  !if ((abs(pdg_number(ipart)) .eq. 211) .or. (pdg_number(ipart) .eq. 111) .or. ) then
-		  if (m .lt. 0.6) then
+		  if (m .le. MASS_LIMIT_FOR_HIGHER_EXPANSION) then
 		    bessum=0.0
 		    do ipi=1, CUT_PI
 		      bessum=bessum + (bessk2(1.0*ipi*bes_arg)*1.0/(1.0*ipi))*exp(ipi*mu/Tfo)
